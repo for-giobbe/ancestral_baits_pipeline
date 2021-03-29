@@ -1,0 +1,12 @@
+name: bait_env
+channels:
+- bioconda
+- defaults
+- conda-forge
+- anaconda
+dependencies:
+- R
+- getorf
+- pal2nal
+- emboss=6.6.0
+
