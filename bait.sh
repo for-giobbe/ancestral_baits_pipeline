@@ -117,10 +117,20 @@ for j in $(grep ">" tmp4.faa);
 
 ################################################################################################################ align and retrotranslate
 
+	if [ -s tmp5.faa ]; 
+
+		then
+
 		linsi tmp5.faa > tmp6.faa #&>/dev/null
 
 		awk -F "_" '{print $1}' tmp6.faa > tmp7.faa
 
 		pal2nal.pl tmp7.faa tmp3.fna -codontable $g -output fasta > def.aln #&>/dev/null;
 
-#rm tmp[0-9]*.*
+		else
+
+		echo -e "\n no sequence passed the length cutoff \n"; exit;
+
+	fi
+
+rm tmp[0-9]*.*
