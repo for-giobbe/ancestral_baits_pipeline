@@ -80,7 +80,7 @@ if [ ! -z "$f" ];
 
 	then
 	
-	echo -e "\n filtering taxonomy with $f"
+	echo -e "\n filtering samples with $f classification"
 
 	old_IFS=$IFS; 
 
@@ -180,7 +180,7 @@ done
 
 ################################################################################################################ filter CDS length
 
-echo -e "\n finding ORFs longer than $c amminoacids"
+echo -e "\n finding ORFs longer than $l amminoacids"
 
 for j in $(grep ">" tmp4.faa); 
 
