@@ -4,9 +4,11 @@ channels:
 - defaults
 - conda-forge
 - anaconda
+
 dependencies:
 - R
 - getorf
 - pal2nal
 - emboss=6.6.0
-
+- cd-hit
+- mafft
