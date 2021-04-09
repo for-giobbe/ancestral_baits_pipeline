@@ -12,3 +12,4 @@ dependencies:
 - emboss=6.6.0
 - cd-hit
 - mafft
+- iqtree

@@ -1,10 +1,12 @@
 #! /bin/bash
 
-while getopts  ":t:l:c:m:g:f:h" o; do
+while getopts  ":t:b:l:c:m:g:f:h" o; do
 
     case "${o}" in
 
         t) t=${OPTARG}
+            ;;
+        b) b=${OPTARG}
             ;;
 	l) l=${OPTARG}
             ;;
@@ -22,6 +24,7 @@ while getopts  ":t:l:c:m:g:f:h" o; do
 			List of non-optional arguments:
 
                         -t	input taxa
+			-b	basename for output files
 			-l	minimum aminoacids length cutoff
 			-c	gen code (e.g. 1 for plastid and nuclear, 5 for mitochondrial invertebrate)
 			-m	marker (e.g. COI-5P)
@@ -45,7 +48,8 @@ while getopts  ":t:l:c:m:g:f:h" o; do
        esac
  done
 
-	if [ -z "$t" ] || [ -z "$l" ] || [ -z "$c" ] || [ -z "$m" ]
+	if [ -z "$t" ] || [ -z "$l" ] || [ -z "$c" ] || [ -z "$m" ] || [ -z "$b" ]
+
 		then
 	
 		echo " WARNING! non-optional argument/s is missing "
@@ -152,7 +156,7 @@ cd-hit -i tmp3.fna -o tmp4.fna -c 1.00 &>/dev/null;
 
 getorf -sequence tmp4.fna -outseq tmp1.faa -table $c &>/dev/null
 
-awk '/^>/ {printf("\n%s\n",$0);next; } { printf("%s",$0);}  END {printf("\n");}' < tmp1.faa > tmp2.faa
+awk '/^>/ {printf("\n%s\n",$0);next; } { printf("%s",$0);} END {printf("\n");}' < tmp1.faa > tmp2.faa
 
 ################################################################################################################ pick longest CDSs
 
@@ -211,13 +215,13 @@ for j in $(grep ">" tmp4.faa);
 
 		then
 
-		echo -e "\n aligning \n"
+		echo -e "\n aligning"
 
 		mafft --quiet --auto --adjustdirection tmp5.faa > tmp6.faa
 
 		awk -F "_" '{print $1}' tmp6.faa > tmp7.faa
 
-		pal2nal.pl tmp7.faa tmp5.fna -codontable $c -output fasta > def.aln 2> /dev/null;
+		pal2nal.pl tmp7.faa tmp5.fna -codontable $c -output fasta > tmp.aln 2> /dev/null;
 
 		else
 
@@ -225,6 +229,26 @@ for j in $(grep ">" tmp4.faa);
 
 	fi
 
-rm tmp[0-9]*.*
+################################################################################################################ write partition files
 
+awk '/^>/ {printf("\n%s\n",$0);next; } { printf("%s",$0);} END {printf("\n");}' < tmp.aln > $b.aln
 
+aln_len=$(head -2 tmp.aln | tail -1 | wc -c)
+
+echo -e "DNA, st = 1-$aln_len" >> tmp.prt
+echo -e	"DNA, nd = 2-$aln_len"	>> tmp.prt
+echo -e	"DNA, rd = 3-$aln_len"	>> tmp.prt
+
+################################################################################################################ infer tree
+
+echo -e "\n inferring the tree"
+
+iqtree -s $b.aln -p tmp.prt &>/dev/null;
+
+mv tmp.prt.treefile $b.nwk
+
+################################################################################################################ clean
+
+echo -e "\n end \n";
+
+rm tmp*.*
