@@ -32,11 +32,11 @@ args = parser.parse_args()
 #################################################################################### download from BOLD
 
 if ( args.location == "" ):
-	subprocess.run(["./bold-cli" , "-taxon" , args.input_taxa , "-output" , "tmp.bold"] , stdout=subprocess.DEVNULL , stderr=subprocess.DEVNULL)
 	print("\n\t downloading sequences for taxa" , args.input_taxa)
+	subprocess.run(["./bold-cli" , "-taxon" , args.input_taxa , "-output" , "tmp.bold"] , stdout=subprocess.DEVNULL , stderr=subprocess.DEVNULL)
 else:
-	subprocess.run(["./bold-cli", "-taxon", args.input_taxa, "-geo" , args.location, "-output" , "tmp.bold"] , stdout=subprocess.DEVNULL , stderr=subprocess.DEVNULL)
 	print("\n\t downloading sequences for taxa" , args.input_taxa, "from location:" , args.location)
+	subprocess.run(["./bold-cli", "-taxon", args.input_taxa, "-geo" , args.location, "-output" , "tmp.bold"] , stdout=subprocess.DEVNULL , stderr=subprocess.DEVNULL)
 
 #################################################################################### filter taxonomy and remove gaps
 
