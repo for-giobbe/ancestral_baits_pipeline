@@ -2,7 +2,12 @@
 #                                                                                   #
 #               This script is used to design baits for eDNA capture.               #
 #                                                                                   #
-##################################################################################### 
+#####################################################################################
+
+#	to do : 
+#	implement more icodes
+#   comprehensive marker list
+#	degenerate nucleotides into baseml
 
 import os
 import glob
@@ -193,9 +198,13 @@ tmp_files = glob.glob('tmp*.*')
 for filePath in tmp_files:
 	os.remove(filePath)
 
-################################################################################### write ctl
+################################################################################### ancestral sequences
 
 print("\n\t inferring ancestral sequences \n")
+
+if ( args.gen_code == "5" ):
+	print(args.gen_code)
+	icode = 4
 
 tmp_ctl=[]
 
@@ -224,15 +233,15 @@ tmp_ctl.append("getSE = 0")
 tmp_ctl.append("RateAncestor = 1")
 tmp_ctl.append("Small_Diff = 1e-6")
 tmp_ctl.append("cleandata = 1")
-icode_line="icode = " + args.gen_code
-tmp_ctl.append(icode_line)
+#icode_line="icode = " + str(icode)
+#tmp_ctl.append(icode_line)
 tmp_ctl.append("fix_blength = 2")
 tmp_ctl.append("method = 0")
-
+bb
 
 with open('tmp.ctl', 'w') as tmp_ctl_file:
     for line in tmp_ctl:
             tmp_ctl_file.write(line + '\n')
             
 with open('tmp.nwk', 'w') as tmp_nwk :
-	subprocess.run(["baseml" , "tmp.ctl"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+	subprocess.run(["baseml" , "tmp.ctl"])
