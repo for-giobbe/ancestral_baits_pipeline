@@ -10,6 +10,7 @@
 #	degenerate nucleotides into baseml
 #	chose gencode based on marker
 #	make everything happen in the temporary folder
+#	implement warnings for steps failure e.g. 1) no sequences on BOLD for the query 2) less than two sequence for tree inference 3) no sequence passing the length cutoff
 
 import os
 import glob
