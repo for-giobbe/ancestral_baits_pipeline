@@ -8,6 +8,8 @@
 #	implement more icodes
 #   comprehensive marker list
 #	degenerate nucleotides into baseml
+#	chose gencode based on marker
+#	make everything happen in the temporary folder
 
 import os
 import glob
@@ -203,7 +205,6 @@ for filePath in tmp_files:
 print("\n\t inferring ancestral sequences \n")
 
 if ( args.gen_code == "5" ):
-	print(args.gen_code)
 	icode = 4
 
 tmp_ctl=[]
@@ -237,11 +238,10 @@ tmp_ctl.append("cleandata = 1")
 #tmp_ctl.append(icode_line)
 tmp_ctl.append("fix_blength = 2")
 tmp_ctl.append("method = 0")
-bb
 
 with open('tmp.ctl', 'w') as tmp_ctl_file:
     for line in tmp_ctl:
             tmp_ctl_file.write(line + '\n')
             
 with open('tmp.nwk', 'w') as tmp_nwk :
-	subprocess.run(["baseml" , "tmp.ctl"])
+	subprocess.run(["baseml" , "tmp.ctl"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
