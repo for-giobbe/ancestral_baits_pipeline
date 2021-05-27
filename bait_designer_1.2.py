@@ -24,47 +24,57 @@ from Bio.Align.Applications import MafftCommandline
 
 #################################################################################### parsing arguments and setting variables
 
+def check_positive(value):
+    try:
+        value = int(value)
+        if value <= 0:
+            raise argparse.ArgumentTypeError("{} is not a positive integer".format(value))
+    except ValueError:
+        raise Exception("{} is not an integer".format(value))
+    return value
+
+
 parser = argparse.ArgumentParser(prog='probe-designer', description='design baits for eDNA capture')
 
 parser._optionals.title = "Required Arguments"
 optional_args=parser.add_argument_group('Optional Arguments')
 
-parser.add_argument('--output', nargs='?', default="probes", help='basename of the oputputs')
-parser.add_argument('--taxa', help='Input taxa.')
-parser.add_argument('--marker', choices=['COI', 'rbcL', 'matK', 'ITS'], help='marker')
-parser.add_argument('--filter_length', '-fl' , nargs='?', default=100, help='Minimum amminoacids length - defeault is 200')
-parser.add_argument('--filter_taxonomy', '-ft', nargs='?', default="", choices=['', 'genus', 'family', 'order'], help='can be genus / family / order - defeault is none')
-parser.add_argument('--geo', nargs='?', default="", help='geographic location of samples')
+parser.add_argument('--out', default="probes", help='basename of oputput file and folders', metavar='')
+parser.add_argument('--taxa', help='input taxa', metavar='')
+parser.add_argument('--marker', choices=['COI', 'rbcL', 'matK', 'ITS'], help='marker - can be COI / rbcL / matK / ITS', metavar='')
+parser.add_argument('--filter_len', '-fl', default=100, help='minimum amminoacids length - defeault is 100', type=check_positive, metavar='')
+parser.add_argument('--filter_tax', '-ft', default="", choices=['', 'genus', 'family', 'order'], help='can be genus / family / order - defeault is none', metavar='')
+parser.add_argument('--geo', default="", help='geographic location of samples', metavar='')
 
-parser.add_argument('--custom_alignment', help='custom alignemnt')
-parser.add_argument('--custom_tree', help='custom tree')
+parser.add_argument('--custom_fas', '-cf', help='custom alignment in fasta format - will skip sequence filtering step', metavar='')
+parser.add_argument('--custom_nwk', '-ct', help='custom tree in newick format - will skip phylogenetci inference, a custom alignment needs to be specified', metavar='')
 
-parser.add_argument('--code', required=True, help='Genetic code (e.g. 1 for plastid and nuclear, 5 for mitochondrial invertebrate)')
-parser.add_argument('--cores', default=1, help='number of cores used - defeault is 1')
-parser.add_argument('--verbose', action='store_false', help='keeps temporary files')
+parser.add_argument('--code', required=True, help='genetic code - e.g. 1 for plastid and nuclear, 5 for mitochondrial invertebrate', metavar='')
+parser.add_argument('--cores', default=1, help='number of cores used - defeault is 1', metavar='')
+parser.add_argument('--verbose', action='store_false', help='keeps temporary folder and files')
 
 args = parser.parse_args()
 
-if not args.custom_alignment and (args.taxa is None):
+if not args.custom_fas and (args.taxa is None):
 	print("\n WARNING! When not using custom alignment --taxa flag is required! \n")
 	quit()
 
-if not args.custom_alignment and (args.marker is None):
+if not args.custom_fas and (args.marker is None):
 	print("\n WARNING! When not using custom alignment --marker flags is required! \n")
 	quit()
 	
-if  args.custom_tree and (args.custom_alignment is None):
+if  args.custom_nwk and (args.custom_alignment is None):
 	print("\n WARNING! When using a custom tree also a custom alignemtn has to be specified! \n")
 	quit()
 
-if path.exists(args.output):
+if path.exists(args.out):
 	print("\n WARNING ! An output folder with the same name already exists! \n")
 	quit()
 else:
-	os.makedirs(args.output)
+	os.makedirs(args.out)
 
-os.makedirs(args.output + "/tmp")
-os.chdir(args.output + "/tmp")
+os.makedirs(args.out + "/tmp")
+os.chdir(args.out + "/tmp")
 
 #################################################################################### define markers
 
