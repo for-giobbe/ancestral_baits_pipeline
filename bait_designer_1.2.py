@@ -215,7 +215,7 @@ SeqIO.write(selected_seqs_nt , tmp3_fna , "fasta")
 
 #################################################################################### align aminoacids
 
-print("\n" , datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), ":\t aligning aminoacids")
+print("\n" , datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), ":\t aligning sequences")
 
 with open('tmp3.faa', 'w') as tmp3_faa, open('tmp2.faa', 'w') as tmp2_faa:
 	os.environ.pop('MAFFT_BINARIES')
@@ -225,6 +225,10 @@ with open('tmp3.faa', 'w') as tmp3_faa, open('tmp2.faa', 'w') as tmp2_faa:
 
 with open('tmp.aln', 'w') as tmp_aln , open('tmp3.fna', 'w') as tmp3_fna:
 	subprocess.run(["pal2nal.pl" , "tmp3.faa" , "tmp3.fna" , "-codontable" , args.code , "-output" , "fasta"], stdout=tmp_aln, stderr=subprocess.DEVNULL)
+
+#################################################################################### select optimal marker size
+
+print("\n" , datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), ":\t select optimal marker size")
 
 #################################################################################### write partition file and infer tree
 
@@ -247,10 +251,10 @@ with open('tmp.nwk', 'w') as tmp_nwk :
 
 ################################################################################### final alignment and tree
 
-def_tre_file = args.output + ".nwk"
+def_tre_file = args.out + ".nwk"
 os.rename('tmp.partitions.treefile' , def_tre_file)
 
-def_aln_file = args.output + ".aln"
+def_aln_file = args.out + ".aln"
 os.rename('tmp.aln' , def_aln_file)
 
 ################################################################################### ancestral sequences
