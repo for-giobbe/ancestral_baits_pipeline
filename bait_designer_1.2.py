@@ -108,8 +108,8 @@ if os.path.getsize("tmp.bold") == 0 :
 
 tmp_1_fasta=[]
 
-if (args.filter_taxonomy != ""):
-	print("\n" , datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), ":\t filtering sequences with" , args.filter_taxonomy , "identification")
+if (args.filter_tax != ""):
+	print("\n" , datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), ":\t filtering sequences with" , args.filter_tax , "identification")
 else:
 	print("\n" , datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), ":\t no taxonomic filtering")
 
@@ -117,21 +117,21 @@ with open("tmp.bold", 'r', errors='ignore') as file:
 	header = file.readline()
 	for l in file :
 		sl = l.split('\t')
-		if (args.filter_taxonomy == "family"):
+		if (args.filter_tax == "family"):
 			if sl[15]:
 				header = (">" + sl[0])
 				seq = sl[71].replace('-','')
 				if sl[69] in marker_list:
 					tmp_1_line=[header, seq]
 					tmp_1_fasta.append(tmp_1_line)
-		elif (args.filter_taxonomy == "genus"):
+		elif (args.filter_tax == "genus"):
 			if sl[19]:
 				header = (">" + sl[0])
 				seq = sl[71].replace('-','')
 				if sl[69] in marker_list:
 					tmp_1_line=[header, seq]
 					tmp_1_fasta.append(tmp_1_line)
-		elif (args.filter_taxonomy == "species"):
+		elif (args.filter_tax == "species"):
 			if sl[21]:
 				header = (">" + sl[0])
 				seq = sl[71].replace('-','')
@@ -162,7 +162,7 @@ subprocess.run(["cd-hit", "-i", "tmp1.fna" , "-o" , "tmp2.fna", "-c" , "1.00"] ,
 
 #################################################################################### find orfs
 
-print("\n" , datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), ":\t extracting longest orf - minimum of" , args.filter_length)
+print("\n" , datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), ":\t extracting longest orf - minimum of" , args.filter_len)
 
 subprocess.run(["getorf" , "-sequence", "tmp2.fna" , "-outseq" , "tmp1.faa" , "-table" , args.code] , stdout=subprocess.DEVNULL , stderr=subprocess.DEVNULL)
 
@@ -195,7 +195,7 @@ selected_seqs_aa = list()
 selected_seqs_header = list()
 
 for record in SeqIO.parse("tmp1.faa", "fasta"):
-	if record.id in cds_to_extract and len(record.seq) >= int(args.filter_length):
+	if record.id in cds_to_extract and len(record.seq) >= int(args.filter_len):
 		selected_seqs_header.append(record.id.split('_')[0])     
 		record.id = record.id.split('_')[0]
 		record.description = ""
