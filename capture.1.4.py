@@ -7,6 +7,7 @@
 # to do:
 # check numeric flags are integers
 # important error: user get it wrong and there are stop codons in the aln
+# check that the species in the tree are present in the alignment - PS: species could be added on a backbone
 
 import os
 import glob
@@ -48,7 +49,7 @@ parser.add_argument('--geo', default="", help='geographic location of samples', 
 parser.add_argument('--custom_fas', '-cf', default="", help='custom alignment in fasta format - will skip sequence filtering step', metavar='')
 parser.add_argument('--custom_nwk', '-cn', default="", help='custom tree in newick format - will skip phylogenetci inference, a custom alignment needs to be specified', metavar='')
 
-parser.add_argument('--code', help='genetic code - e.g. 1 for plastid and nuclear, 5 for mitochondrial invertebrate', metavar='')
+parser.add_argument('--code', required=True, help='genetic code - e.g. 1 for plastid and nuclear, 5 for mitochondrial invertebrate', metavar='')
 parser.add_argument('--cores', default=1, help='number of cores used - defeault is 1', metavar='')
 parser.add_argument('--verbose', action='store_false', help='keeps temporary folder and files')
 
