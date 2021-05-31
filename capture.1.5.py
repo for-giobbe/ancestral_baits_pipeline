@@ -5,7 +5,10 @@
 #####################################################################################
 
 # to do:
-# important error: user get it wrong and there are stop codons in the aln
+# non-coding marker
+# branchlength in constrain tree
+# stop codon warning
+# less than 4 sequences warning
 
 import os
 import glob
@@ -39,15 +42,15 @@ optional_args=parser.add_argument_group('Optional Arguments')
 
 parser.add_argument('--out', default="probes", help='basename of oputput file and folders', metavar='')
 parser.add_argument('--taxa', help='input taxa', metavar='')
-parser.add_argument('--marker', choices=['COI', 'rbcL', 'matK', 'ITS', 'coding' , 'noncoding'], help='marker: can be COI / rbcL / matK / ITS when downloading sequences from BOLD - can be coding/ noncoding when using custom fasta file', metavar='')
+parser.add_argument('--marker', required=True, choices=['COI', 'rbcL', 'matK', 'ITS', 'coding' , 'noncoding'], help='marker: can be COI / rbcL / matK / ITS when downloading sequences from BOLD - can be coding/ noncoding when using custom fasta file', metavar='')
 parser.add_argument('--filter_len', '-fl', default=100, help='minimum amminoacids length - defeault is 100', type=check_positive, metavar='')
-parser.add_argument('--filter_tax', '-ft', default="", choices=['', 'genus', 'family', 'order'], help='can be genus / family / order - defeault is none', metavar='')
+parser.add_argument('--filter_tax', '-ft', default="", choices=['genus', 'family', 'order'], help='can be genus / family / order - defeault is none', metavar='')
 parser.add_argument('--geo', default="", help='geographic location of samples', metavar='')
 
-parser.add_argument('--custom_fas', '-cf', default="", help='custom alignment in fasta format - will skip sequence filtering step', metavar='')
-parser.add_argument('--custom_nwk', '-cn', default="", help='custom tree in newick format - will skip phylogenetci inference, a custom alignment needs to be specified', metavar='')
+parser.add_argument('--custom_fas', '-cf', default="", help='custom alignment in fasta format', metavar='')
+parser.add_argument('--custom_nwk', '-cn', default="", help='custom tree in newick format - a custom alignment needs to be specified: skips phylogenetic inference if there is 1:1 match betwenn tree and msa, otherwise will use it as a constrain', metavar='')
 
-parser.add_argument('--code', required=True, help='genetic code - e.g. 1 for plastid and nuclear, 5 for mitochondrial invertebrate', metavar='')
+parser.add_argument('--code', help='genetic code - e.g. 1 for plastid and nuclear, 5 for mitochondrial invertebrate', metavar='')
 parser.add_argument('--cores', type=check_positive, default=1, help='number of cores used - defeault is 1', metavar='')
 parser.add_argument('--verbose', action='store_false', help='keeps temporary folder and files')
 parser.add_argument('--erase', action='store_true', help='erases and rewrites an output folder with same name')
@@ -65,11 +68,11 @@ if not args.custom_fas and (args.marker is None):
 	quit()
 	
 if  args.custom_nwk and (args.custom_fas is None):
-	print("\n WARNING! When using a custom tree also a custom alignemtn has to be specified! \n")
+	print("\n WARNING! When using a custom tree also a custom alignment has to be specified! \n")
 	quit()
 
 if args.erase == False and path.exists(args.out):
-	print("\n WARNING ! An output folder with the same name already exists! \n")
+	print("\n WARNING! An output folder with the same name already exists! \n")
 	quit()
 elif args.erase == True and path.exists(args.out):
 	shutil.rmtree(args.out)
@@ -78,12 +81,13 @@ else:
 	os.makedirs(args.out)
 
 if ( args.custom_fas == "" ) and ( args.custom_nwk != "" ):
-	print("\n WARNING ! When specifying a custom phylogeny, also a custo msa has to be specified! \n")
+	print("\n WARNING! When specifying a custom phylogeny, also a custom msa has to be specified! \n")
 	quit()
 	
-if int(args.code) not in range (1, 33):
-	print("\n WARNING ! Unknown geneitc code has been specified - please refer to NCBI! \n")
-	quit()
+if (args.code != None):
+	if int(args.code) not in range (1, 33):
+		print("\n WARNING! Unknown geneitc code has been specified - please refer to NCBI! \n")
+		quit()
 
 os.makedirs(args.out + "/tmp")
 os.chdir(args.out + "/tmp")
@@ -93,19 +97,34 @@ os.chdir(args.out + "/tmp")
 if ( args.marker == "COI" ):
 	marker_list=[ "COI" , "COI-5P" , "COI-3P" ]
 	coding = True
+	if ( args.code == None ):
+		print("\n WARNING! a genetic code has to be specified when using a coding marker \n")
+		quit()
 elif ( args.marker == "rbcL" ):
 	marker_list=[ "rbcl" , "RBCL" , "Rbcl" , "rbcla" , "rbcl-a" ]
 	coding = True
+	if ( args.code == None ):
+		print("\n WARNING! a genetic code has to be specified when using a coding marker \n")
+		quit()
 elif ( args.marker == "matK" ):
 	marker_list=[ "matK" , "matk" , "MATK" ]
 	coding = True
+	if ( args.code == None ):
+		print("\n WARNING! a genetic code has to be specified when using a coding marker \n")
+		quit()
 elif ( args.marker == "ITS" ):
 	marker_list=[ "ITS" , "its" ]
 	coding = False
+	if ( args.code != None ):
+		print("\n WARNING! a genetic code has been specified when using a non-coding marker \n")
+		quit()
 
-if ( args.custom_fas != "" ) and ( args.code != "" ):
+if ( args.custom_fas != "" ) and ( args.marker == "coding" ):
 	coding = True
-else:
+	if ( args.code == None ):
+		print("\n WARNING! a genetic code has to be specified when using a coding marker \n")
+		quit()
+elif ( args.custom_fas != "" ) and ( args.marker == "noncoding" ):
 	coding = False
 
 #################################################################################### big IF
@@ -121,7 +140,7 @@ if (args.custom_fas == ""):
 			print("\n WARNING! The BOLD search for marker" , args.marker , "and taxa" , args.taxa , "returned nothing! \n")
 			quit()
 	else:
-		print("\n" , datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), ":\t downloading" , args.marker , "sequences for taxa" , args.taxa, "from " , args.geo)
+		print("\n" , datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), ":\t downloading" , args.marker , "sequences for taxa" , args.taxa, "from" , args.geo)
 		subprocess.run(["../../bold-cli" , "-taxon" , args.taxa , "-marker" , args.marker , "-geo" , args.geo, "-output" , "tmp.bold"] , stdout=subprocess.DEVNULL , stderr=subprocess.DEVNULL)
 		if os.path.getsize("tmp.bold") == 0 :
 			print("\n WARNING! The BOLD search for marker" , args.marker , "and taxa" , args.taxa , "in" , args.geo , "returned nothing! \n")
@@ -245,11 +264,6 @@ SeqIO.write(selected_seqs_nt , tmp3_fna , "fasta")
 #	print("\n WARNING! Less than 4 sequences passed the length cutoff! \n" , num)
 #	quit()
 
-#################################################################################### finish filtering
-
-num_lines = sum(1 for line in open('tmp2.faa'))
-print("\n" , datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), ":\t filering retained" , num_lines , "sequences")
-
 #################################################################################### align aminoacids
 
 print("\n" , datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), ":\t aligning sequences")
@@ -342,7 +356,7 @@ elif (args.custom_nwk == ""):
 	
 ################################################################################### ancestral sequences
 
-print("\n" , datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), ":\t inferring ancestral sequences")
+print("\n" , datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), ":\t inferring ancestral sequences using genetic code" , args.code)
 
 icode = int(args.code) - 1
 
@@ -354,7 +368,7 @@ tmp_ctl.append("outfile = tmp_baseml.out")
 tre_line="treefile = " + def_tre_file
 tmp_ctl.append(tre_line)
 tmp_ctl.append("noisy = 3")
-tmp_ctl.append("verbose = 0")
+tmp_ctl.append("verbose = 1")
 tmp_ctl.append("runmode = 0")
 tmp_ctl.append("model = 7")
 tmp_ctl.append("Mgene = 0")
