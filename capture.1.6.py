@@ -8,6 +8,7 @@
 # branchlength in constrain tree
 # stop codon warning
 # less than 4 sequences warning
+# print non-coding status in stdout messages
 
 import os
 import glob
