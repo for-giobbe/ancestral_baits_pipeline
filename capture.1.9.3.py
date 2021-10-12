@@ -639,12 +639,25 @@ with open("nodes.csv", 'r') as nodes:
  
 def_probes_file = args.out + ".probes.fa"
 os.rename('baits.fa' , def_probes_file)
+
+def_figure_file = args.out + ".probes.png"
+os.rename('tmp.png' , def_figure_file)
                    
 ################################################################################### copy output to main dir and clean
+
+stats = open("stats.csv", "r")
+nums = stats.readlines()
+inc_baits_spp=nums[0]
+total_num_spp=nums[1]
+perc_of_speci=nums[2]
+total_n_baits=nums[3]
+
+print("\n" , datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), ":\t written", total_n_baits.split(' ')[1].strip('\n"'),"baits which underlie",inc_baits_spp.split(' ')[1].strip('\n"'),"out of",total_num_spp.split(' ')[1].strip('\n"'),"unique tips (" , perc_of_speci.split(' ')[1].strip('\n"'),"%)")
 
 shutil.copy(def_probes_file, '..')
 shutil.copy(def_aln_file, '..')
 shutil.copy(def_tre_file, '..')
+shutil.copy(def_figure_file, '..')
 
 os.chdir('..')
 
